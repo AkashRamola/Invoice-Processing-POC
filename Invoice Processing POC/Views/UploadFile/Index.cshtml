@@ -1,0 +1,407 @@
+﻿@{
+    ViewData["Title"] = "PDF Upload";
+    Layout = null;
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<style>
+    body {
+        background: #f4f7fb;
+    }
+
+    .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .content-row {
+        display: flex;
+        gap: 25px;
+        width: 100%;
+        max-width: 420px;
+        transition: max-width 0.35s ease;
+    }
+
+    .content-row.expanded {
+        max-width: 1200px;
+    }
+
+    .upload-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        flex: 0 0 380px;
+        max-width: 380px;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .upload-title {
+        text-align: center;
+        color: #0d6efd;
+        font-weight: 600;
+        margin-bottom: 30px;
+    }
+
+    .pdf-icon {
+        font-size: 60px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .file-name-chip {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        background: #eef4ff;
+        border: 1px solid #d6e4ff;
+        color: #0d6efd;
+        font-size: 0.82rem;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-top: 10px;
+        word-break: break-all;
+    }
+
+    .btn-custom {
+        width: 48%;
+        height: 45px;
+        font-size: 17px;
+        font-weight: 500;
+    }
+
+    .preview-card {
+        background-color:none;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        padding: 20px;
+        display: none;
+        flex: 1 1 auto;
+        min-width: 0;
+        position: relative;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .preview-close-btn {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #f1f3f5;
+        border: none;
+        color: #495057;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+        z-index: 5;
+    }
+
+        .preview-close-btn:hover {
+            background: #dc3545;
+            color: #fff;
+            transform: rotate(90deg);
+        }
+
+    .preview-title {
+        text-align: center;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 15px;
+    }
+
+    #pdfPreview {
+        background: red;
+        width: 100%;
+        height: 700px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+    }
+
+    .top-nav {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .logout-btn {
+        background: #1f6feb;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 7px 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(31, 111, 235, 0.25);
+        transition: all 0.25s ease;
+    }
+
+    .logout-btn:hover {
+        background: #1558c0;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(31, 111, 235, 0.35);
+    }
+
+    .logout-btn:active {
+        transform: translateY(0);
+    }
+
+    .logout-btn i {
+        font-size: 15px;
+    }
+</style>
+<nav class="top-nav">
+    <button class="logout-btn" onclick="Logout()">
+        <i class="fas fa-power-off me-2"></i> Log Out
+    </button>
+</nav>
+<div class="page-wrapper">
+    <div class="content-row" id="contentRow">
+
+        <!-- Upload Card -->
+        <div class="upload-card">
+
+            <div class="pdf-icon">
+                📄
+            </div>
+
+            <h3 class="upload-title">
+                Upload PDF File
+            </h3>
+
+            <input type="file" id="pdfFile" class="form-control form-control-lg" accept=".pdf" />
+
+            <div class="file-name-chip" id="fileNameChip">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span id="fileNameText"></span>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" id="btnPreview" class="btn btn-secondary btn-custom">
+                    Preview PDF
+                </button>
+
+                <button type="button" id="btnUpload" class="btn btn-primary btn-custom">
+                    Upload PDF
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- PDF Preview -->
+        <div class="preview-card" id="previewContainer">
+
+            @* <button type="button" class="preview-close-btn" id="btnClosePreview" title="Close preview">
+                <i class="bi bi-x-lg"></i>
+            </button> *@
+
+            <h4 class="preview-title">
+                PDF Preview
+            </h4>
+            <button type="button" class="preview-close-btn" id="btnClosePreview" title="Close preview">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <iframe id="pdfPreview" ></iframe>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    // Show selected file name as a chip
+    $("#pdfFile").on("change", function () {
+        var file = this.files[0];
+        if (file) {
+            $("#fileNameText").text(file.name);
+            $("#fileNameChip").show();
+        }
+        else {
+            $("#fileNameChip").hide();
+        }
+    });
+
+    // Preview Button
+
+    $("#btnPreview").click(function () { 
+        var file = $("#pdfFile")[0].files[0];
+        if (!file) {
+            Swal.fire({
+                icon: "warning",
+                title: "No File Selected",
+                text: "Please select a PDF first."
+            });
+            return;
+        }
+        if (file.type !== "application/pdf") {
+            Swal.fire({
+                icon: "error",
+                title: "Invalid File",
+                text: "Only PDF files are allowed."
+            });
+            return;
+        }
+
+        var pdfUrl = URL.createObjectURL(file);
+        $("#pdfPreview").attr("src", pdfUrl);
+        $("#previewContainer").show();
+        $("#contentRow").addClass("expanded");
+    });
+
+
+    // Close Preview Button
+
+    $("#btnClosePreview").click(function () {
+
+        $("#previewContainer").hide();
+
+        $("#contentRow").removeClass("expanded");
+
+        $("#pdfPreview").attr("src", "");
+
+    });
+
+
+    // Upload Button
+
+    $("#btnUpload").click(function () {
+        var file = $("#pdfFile")[0].files[0];
+        if (!file) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No File Selected',
+                text: 'Please select a PDF file.'
+            });
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append("pdfFile", file);
+
+        $.ajax({
+            url: '@Url.Action("UploadPdf", "UploadFile")',
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
+                $("#btnUpload").prop("disabled", true).text("Uploading...");
+                Swal.fire({
+                    title: "Uploading...",
+                    text: "Please wait",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+            },
+
+            success: function (response) {
+
+                Swal.close();
+
+                if (response.success) {
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: response.message
+                    }).then(() => {
+                        window.location.href = '@Url.Action("Index", "UploadFile")';
+                    });
+
+                }
+                else {
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Upload Failed",
+                        text: response.message
+                    });
+
+                }
+
+            },
+
+            error: function () {
+
+                Swal.close();
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong."
+                });
+
+            },
+
+            complete: function () {
+
+                $("#btnUpload")
+                    .prop("disabled", false)
+                    .text("Upload PDF");
+
+            }
+
+        });
+
+    });
+    function Logout() {
+        $.ajax({
+            url: '@Url.Action("Logout", "Login")', // Use Url.Action for the URL
+            type: 'GET',
+            success: function (response) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Logout",
+                    text: response.message
+                }).then(() => {
+                    window.location.href = '@Url.Action("Index", "Login")';
+                });
+
+            }
+            // async: false,
+            // success: function (response) {
+            //     $('#adminuserid').text(response);
+            // },
+            // error: function (xhr, status, error) {
+            //     console.error('Error occurred:', error); Optional: Log the error
+            // }
+        });
+    }
+
+</script>
