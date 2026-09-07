@@ -22,7 +22,6 @@ namespace Invoice_Processing_POC
                 options.UseSqlServer(ConnectionString);
             });
             builder.Services.AddTransient<ILoginInterface, LoginClass>();
-            // builder.Services.AddTransient<IUploadFile, UploadFile>();
             builder.Services.AddTransient<IUploadFile, UploadFile>();
 
             var app = builder.Build();
