@@ -57,7 +57,7 @@ namespace Invoice_Processing_POC
             //});
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Login}/{action=Index}/{id?}");
+                pattern: "{controller=UploadFile}/{action=Index}/{id?}");
 
             app.Run();
         }

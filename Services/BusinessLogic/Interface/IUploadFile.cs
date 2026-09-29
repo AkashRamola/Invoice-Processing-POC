@@ -11,5 +11,6 @@ namespace Services.BusinessLogic.Interface
     public interface IUploadFile
     {
         public Task<UploadFileStatusDTO> Uploadpdf(IFormFile pdfFile);
+        public Task<string> UploadedFileProcess(UploadFileStatusDTO data);
     }
 }
