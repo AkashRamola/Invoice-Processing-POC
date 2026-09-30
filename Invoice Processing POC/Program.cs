@@ -24,6 +24,11 @@ namespace Invoice_Processing_POC
             builder.Services.AddTransient<ILoginInterface, LoginClass>();
             builder.Services.AddTransient<IUploadFile, UploadFile>();
 
+            builder.Services.AddDbContext<InvoiceProcessingDbContext>(options =>
+                options.UseSqlServer(ConnectionString),
+                ServiceLifetime.Transient
+            );
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

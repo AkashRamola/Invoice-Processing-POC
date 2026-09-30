@@ -1,4 +1,5 @@
-﻿using DTO.Data;
+﻿using DAL.Database;
+using DTO.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Services.BusinessLogic.Interface;
@@ -11,8 +12,10 @@ namespace Invoice_Processing_POC.Controllers
     {
         private readonly IUploadFile _uploadfile;
         private readonly ILogger<UploadFileController> _logger;
-        public UploadFileController(IUploadFile uploadfile, ILogger<UploadFileController> logger)
+        private readonly InvoiceProcessingDbContext _context;
+        public UploadFileController(IUploadFile uploadfile, ILogger<UploadFileController> logger, InvoiceProcessingDbContext context)
         {
+            _context = context;
             _logger = logger;
             _uploadfile = uploadfile;
         }
@@ -27,16 +30,15 @@ namespace Invoice_Processing_POC.Controllers
             UploadFileStatusDTO result = new UploadFileStatusDTO();
             try
             {
+                var data = new UploadDocument();
                 result = await _uploadfile.Uploadpdf(pdfFile);
                 if(result.Success)
                 {
-                    var data = new UploadDocument()
-                    {
-                        FileRealName = result.FileName,
-                        FileName = result.uniqueFileName,
-                        UploadDate = DateTime.Now,
-                        source = "upload"
-                    };
+
+                    data.FileRealName = result.FileName;
+                    data.FileName = result.uniqueFileName;
+                    data.UploadDate = DateTime.Now;
+                    data.source = "upload";
                 }
                 if (!result.Success)
                 {
@@ -45,9 +47,9 @@ namespace Invoice_Processing_POC.Controllers
                 }
                 var extractedText = await _uploadfile.UploadedFileProcess(result);
 
-
-                //await _context.UploadDocuments.AddAsync(data);
-                //await _context.SaveChangesAsync();
+                data.ExtractedInfo= extractedText;
+                await _context.UploadDocuments.AddAsync(data);
+                await _context.SaveChangesAsync();
 
                 return Ok(new
                 {
