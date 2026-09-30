@@ -1,8 +1,10 @@
 ﻿using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.Identity;
+using DAL.Database;
 using DTO.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Services.BusinessLogic.Interface;
@@ -11,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UCAIDataBase.DataBase;
 
 namespace Services.BusinessLogic.Implementation
 {
@@ -19,10 +22,12 @@ namespace Services.BusinessLogic.Implementation
         private readonly IConfiguration _config;
         private readonly ILogger<UploadFile> _logger;
         private readonly DefaultAzureCredential defaultAzureCredential;
-        public UploadFile(IConfiguration config, ILogger<UploadFile> logger)
+        private readonly InvoiceProcessingDbContext _context;
+        public UploadFile(IConfiguration config, ILogger<UploadFile> logger, InvoiceProcessingDbContext context)
         {
             _logger = logger;
             _config = config;
+            _context = context;
             var managedIdentityClientId = config["ManagedIdentity:ClientId"];
             defaultAzureCredential = new DefaultAzureCredential(
               new DefaultAzureCredentialOptions
@@ -153,6 +158,27 @@ namespace Services.BusinessLogic.Implementation
                 data.Message = ex.Message;
 
                 return data.ToString();
+            }
+        }
+        public async Task<List<UploadDocumentDTO>> GetAllUploadedFiles()
+        {
+            try
+            {
+                List<UploadDocumentDTO> allUploadedFiles = await _context.UploadDocuments
+                    .Select(file => new UploadDocumentDTO
+                    {
+                        FileRealName = file.FileRealName ?? "Unknown",
+                        FileName = file.FileName,
+                        UploadDate = file.UploadDate,
+                        IsProcessed = file.IsProcessed,
+                        Source = file.source
+                    }).OrderByDescending(d => d.UploadDate).ToListAsync();
+                return allUploadedFiles;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in getting uploaded files");
+                throw;
             }
         }
     }

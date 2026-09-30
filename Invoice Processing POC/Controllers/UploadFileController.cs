@@ -65,6 +65,11 @@ namespace Invoice_Processing_POC.Controllers
             }
             
         }
-            
+        public async Task<IActionResult> UploadedFile()
+        {
+            var uploadedFiles = await _uploadfile.GetAllUploadedFiles();
+
+            return View(uploadedFiles);
+        }
     } 
 }
