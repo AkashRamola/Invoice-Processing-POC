@@ -84,7 +84,7 @@ namespace Services.BusinessLogic.Implementation
                 
             }
         }
-        public async Task<string> UploadedFileProcess(UploadFileStatusDTO data)
+        public async Task<string?> UploadedFileProcess(UploadFileStatusDTO data)
         {
             try
             {

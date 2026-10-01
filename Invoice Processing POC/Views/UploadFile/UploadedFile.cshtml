@@ -4,7 +4,42 @@
 }
 
 @model IEnumerable<DTO.Data.UploadDocumentDTO>
+<style>
+    .popup {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 
+    .popup-content {
+        background-color: white;
+        width: 70%;
+        max-height: 70%;
+        margin: 8% auto;
+        padding: 20px;
+        border-radius: 8px;
+        position: relative;
+        overflow-y: auto;
+    }
+
+    .close-button {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    #extractedTextContent {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
 
 <div>
     <div>
@@ -35,7 +70,25 @@
                             <td>@serialNumber</td>
                             <td>@file.FileName</td>
                             <td>@file.UploadDate.ToString("dd/MM/yyyy")</td>
-                            <td>@file.ExtractedInfo</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(file.ExtractedInfo))
+                                {
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm"
+                                            onclick="showExtractedText('@file.DocId')">
+                                        View Extracted Text
+                                    </button>
+
+                                    <div id="extractedText_@file.DocId"
+                                         style="display:none;">
+                                        @file.ExtractedInfo
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No extracted text</span>
+                                }
+                            </td>
                         </tr>
                         serialNumber++;
                     }
@@ -50,3 +103,43 @@
         </table>
     </div>
 </div>
+
+<div id="extractedTextPopup" class="popup">
+
+    <div class="popup-content">
+
+        <span class="close-button"
+              onclick="closeExtractedText()">
+            &times;
+        </span>
+
+        <h3>Extracted Text</h3>
+
+        <div id="extractedTextContent"></div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+    function showExtractedText(id)
+    {
+        var text=document.getElementById("extractedText_"+id);
+         // Put the extracted text inside the popup
+        document.getElementById("extractedTextContent").textContent = text;
+
+        // Show the popup
+        document.getElementById("extractedTextPopup").style.display = "block";
+    }
+
+
+    function closeExtractedText()
+    {
+        // Hide the popup
+        document.getElementById("extractedTextPopup").style.display = "none";
+    }
+
+    
+</script>

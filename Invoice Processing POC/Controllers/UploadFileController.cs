@@ -47,9 +47,12 @@ namespace Invoice_Processing_POC.Controllers
                 }
                 var extractedText = await _uploadfile.UploadedFileProcess(result);
 
-                data.ExtractedInfo= extractedText;
-                await _context.UploadDocuments.AddAsync(data);
-                await _context.SaveChangesAsync();
+                if (extractedText != null)
+                {
+                    data.ExtractedInfo = extractedText;
+                    await _context.UploadDocuments.AddAsync(data);
+                    await _context.SaveChangesAsync();
+                }
 
                 return Ok(new
                 {

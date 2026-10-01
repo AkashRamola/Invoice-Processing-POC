@@ -5,6 +5,7 @@ namespace DTO.Data
 {
     public partial class UploadDocumentDTO
     {
+        public int DocId { get; set; }
 
         public string FileRealName { get; set; } = null!;
 
